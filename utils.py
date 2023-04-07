@@ -7,6 +7,9 @@ import sys
 import time
 import json
 from typing import Optional, Sequence, Union
+from typing import Dict
+
+dict = Dict
 
 import openai
 import tqdm

@@ -1,0 +1,66 @@
+diff --git a/train.py b/train.py
+index de2c111..7d039f8 100644
+--- a/train.py
++++ b/train.py
+@@ -16,11 +16,13 @@ import copy
+ import logging
+ from dataclasses import dataclass, field
+ from typing import Optional, Dict, Sequence
++import pathlib
+ 
+ import torch
+ import transformers
+ from torch.utils.data import Dataset
+ from transformers import Trainer
++# from modeling_llama import llama_model
+ 
+ import utils
+ 
+@@ -58,7 +60,7 @@ class TrainingArguments(transformers.TrainingArguments):
+     cache_dir: Optional[str] = field(default=None)
+     optim: str = field(default="adamw_torch")
+     model_max_length: int = field(
+-        default=512,
++        default=512, # 512
+         metadata={"help": "Maximum sequence length. Sequences will be right padded (and possibly truncated)."},
+     )
+ 
+@@ -205,6 +207,11 @@ def train():
+         padding_side="right",
+         use_fast=False,
+     )
++
++    # model, tokenizer = llama_model(lm=True, model_max_length=training_args.model_max_length)
++
++    model = model.to(torch.bfloat16)
++
+     if tokenizer.pad_token is None:
+         smart_tokenizer_and_embedding_resize(
+             special_tokens_dict=dict(pad_token=DEFAULT_PAD_TOKEN),
+@@ -222,7 +229,11 @@ def train():
+ 
+     data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
+     trainer = Trainer(model=model, tokenizer=tokenizer, args=training_args, **data_module)
+-    trainer.train()
++    # trainer.train()
++    if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
++        trainer.train(resume_from_checkpoint=True)
++    else:
++        trainer.train()
+     trainer.save_state()
+     safe_save_model_for_hf_trainer(trainer=trainer, output_dir=training_args.output_dir)
+ 
+diff --git a/utils.py b/utils.py
+index 0d47b5f..23fd82c 100644
+--- a/utils.py
++++ b/utils.py
+@@ -7,6 +7,9 @@ import sys
+ import time
+ import json
+ from typing import Optional, Sequence, Union
++from typing import Dict
++
++dict = Dict
+ 
+ import openai
+ import tqdm

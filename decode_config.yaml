@@ -1,0 +1,25 @@
+# Parameters that control the length of the output
+max_new_tokens: 1024
+# min_new_tokens: 1
+# max_length: 512
+# min_length: 1
+# early_stopping: False
+
+# Parameters that control the generation strategy used
+do_sample: True
+# num_beams: 4
+# num_beam_groups: 1
+# penalty_alpha: 0.6
+
+# Parameters for manipulation of the model output logits
+temperature: 0.6
+top_p: 0.95
+# top_k: 40
+repetition_penalty: 1.1
+# length_penalty: 1.0
+# diversity_penalty: 0.0
+# no_repeat_ngram_size: 0
+
+add_instruction: True
+
+# prompt
